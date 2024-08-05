@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Azure DevOps Status Report</title>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 20px; }
+        #chat { height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; margin-bottom: 10px; }
+        #generate-btn { padding: 10px; font-size: 16px; }
+    </style>
+</head>
+<body>
+    <div id="chat"></div>
+    <button id="generate-btn">Generate Status Report</button>
+
+    <script>
+        const socket = io();
+        const chatDiv = document.getElementById('chat');
+        const generateBtn = document.getElementById('generate-btn');
+
+        generateBtn.addEventListener('click', () => {
+            socket.emit('generate-report');
+            //addMessage('Generating status report...', 'user');
+        });
+
+        socket.on('report-generated', (report) => {
+            addMessage(marked.parse(report), 'bot');
+        });
+
+        socket.on('error', (error) => {
+            addMessage(`Error: ${error}`, 'error');
+        });
+
+        function addMessage(message, sender) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = sender;
+            messageDiv.innerHTML = message;
+            chatDiv.appendChild(messageDiv);
+            chatDiv.scrollTop = chatDiv.scrollHeight;
+        }
+    </script>
+</body>
+</html>
